@@ -111,6 +111,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<CommentsModel>("com.verdanditeam.yt", 1, 0, "CommentsModel");
     qmlRegisterType<VideoDownloader>("com.verdanditeam.yt", 1, 0, "VideoDownloader");
     qmlRegisterType<JsDiagnostics>("com.verdanditeam.yt", 1, 0, "JsDiagnostics");
+    qmlRegisterType<JSProcessManager>("com.verdanditeam.yt", 1, 0, "JsProcessManager");
     qmlRegisterUncreatableType<Search>("com.verdanditeam.yt", 1, 0, "Search", "");
 
     view->setSource(SailfishApp::pathTo("qml/microtube.qml"));

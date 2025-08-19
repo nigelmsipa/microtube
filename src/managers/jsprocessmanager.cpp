@@ -78,15 +78,6 @@ bool JSProcessManager::asyncGetVideoInfo(Search query)
     return true;
 }
 
-void JSProcessManager::asyncLoadRecommendedVideos(Search query)
-{
-    if (_getUrlProcess != nullptr) return;
-
-    QJsonDocument optionsDoc(prepareSearchOptions(&query, nullptr));
-    _getUrlProcess = execute("basicVideoInfo", {query.query, optionsDoc.toJson(QJsonDocument::Compact)});
-    connect(_getUrlProcess, static_cast<void (QProcess::*)(int)>(&QProcess::finished), this, &JSProcessManager::gotRecommendedVideosInfo);
-}
-
 void JSProcessManager::asyncGetTrending(Search* query)
 {
     if (_trendingProcess != nullptr) return;
@@ -442,18 +433,7 @@ void JSProcessManager::gotVideoInfoJson(int exitStatus)
     _videoInfo = VideoFactory::fromVideoInfoJson(response.object());
     emit gotVideoInfo(formats);
 
-    QProcess* process = _getUrlProcess;
-    _getUrlProcess = nullptr;
-    process->deleteLater();
-}
-
-void JSProcessManager::gotRecommendedVideosInfo(int exitStatus)
-{
-    QJsonDocument response = QJsonDocument::fromJson(_getUrlProcess->readAll());
-    QJsonObject obj = response.object();
-
     _recommendedVideos = VideosParser::parseRecommended(response.object()["info"].toObject()["watch_next_feed"].toArray());
-
     emit gotRecommendedVideos();
 
     QProcess* process = _getUrlProcess;

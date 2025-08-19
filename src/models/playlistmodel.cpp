@@ -5,14 +5,14 @@
 #include <QUrlQuery>
 #include <repositories/authorrepository.h>
 
-PlaylistModel::PlaylistModel(QObject *parent) : QAbstractListModel(parent), _currentVideoIndex(0), _busy(false)
+PlaylistModel::PlaylistModel(QObject *parent) : QAbstractListModel(parent), _jsProcessManager(new JSProcessManager), _currentVideoIndex(0), _busy(false)
 {
-    connect(&_jsProcessManager, &JSProcessManager::searchFinished, this, &PlaylistModel::searchDone);
-    connect(&_jsProcessManager, &JSProcessManager::gotTrendingVideos, this, &PlaylistModel::gotTrendingVideos);
-    connect(&_jsProcessManager, &JSProcessManager::gotRecommendedVideos, this, &PlaylistModel::gotRecommendedVideos);
-    connect(&_jsProcessManager, &JSProcessManager::gotChannelVideos, this, &PlaylistModel::gotChannelVideos);
-    connect(&_jsProcessManager, &JSProcessManager::gotVideoInfo, this, &PlaylistModel::gotVideoInfo);
-    connect(&_jsProcessManager, &JSProcessManager::gotPlaylist, this, &PlaylistModel::gotPlaylist);
+    connect(_jsProcessManager, &JSProcessManager::searchFinished, this, &PlaylistModel::searchDone);
+    connect(_jsProcessManager, &JSProcessManager::gotTrendingVideos, this, &PlaylistModel::gotTrendingVideos);
+    connect(_jsProcessManager, &JSProcessManager::gotRecommendedVideos, this, &PlaylistModel::gotRecommendedVideos);
+    connect(_jsProcessManager, &JSProcessManager::gotChannelVideos, this, &PlaylistModel::gotChannelVideos);
+    connect(_jsProcessManager, &JSProcessManager::gotVideoInfo, this, &PlaylistModel::gotVideoInfo);
+    connect(_jsProcessManager, &JSProcessManager::gotPlaylist, this, &PlaylistModel::gotPlaylist);
 }
 
 int PlaylistModel::rowCount(const QModelIndex &parent) const
@@ -188,14 +188,6 @@ void PlaylistModel::searchAgain()
     executeSearch();
 }
 
-void PlaylistModel::loadRecommendedVideos(QString query)
-{
-    Search search = createNewSearch();
-    search.query = query;
-    search.type = Search::VideoInfo;
-    _jsProcessManager.asyncLoadRecommendedVideos(search);
-}
-
 void PlaylistModel::loadCategory(QString category)
 {
     if (category == "") return;
@@ -244,7 +236,7 @@ void PlaylistModel::continueChannelVideos()
     _lastSearch = search;
     emit lastSearchChanged();
 
-    _jsProcessManager.asyncContinueChannelVideos(&_lastSearch.value());
+    _jsProcessManager->asyncContinueChannelVideos(&_lastSearch.value());
 }
 
 QString PlaylistModel::getIdAt(int index)
@@ -311,7 +303,7 @@ void PlaylistModel::addVideo(QString id, quint8 retryCount)
     search.query = id;
     search.type = Search::VideoInfo;
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    _items.emplace_back(_jsProcessManager.getBasicVideoInfo(search));
+    _items.emplace_back(_jsProcessManager->getBasicVideoInfo(search));
     endInsertRows();
 }
 
@@ -395,16 +387,16 @@ void PlaylistModel::executeSearch()
 
     switch (_lastSearch->type) {
     case Search::Query:
-        _jsProcessManager.asyncSearch(&_lastSearch.value());
+        _jsProcessManager->asyncSearch(&_lastSearch.value());
         break;
     case Search::Category:
-        _jsProcessManager.asyncGetTrending(&_lastSearch.value());
+        _jsProcessManager->asyncGetTrending(&_lastSearch.value());
         break;
     case Search::Channel:
     case Search::ChannelShorts:
     case Search::ChannelLiveStreams:
     case Search::ChannelPlaylists:
-        _jsProcessManager.asyncLoadChannelVideos(&_lastSearch.value());
+        _jsProcessManager->asyncLoadChannelVideos(&_lastSearch.value());
         break;
     case Search::Subscriber:
     {
@@ -430,7 +422,7 @@ void PlaylistModel::executeSearch()
     }
         break;
     case Search::Playlist:
-        _jsProcessManager.asyncLoadPlaylist(&_lastSearch.value());
+        _jsProcessManager->asyncLoadPlaylist(&_lastSearch.value());
         break;
     case Search::VideoInfo:
         break;
@@ -532,9 +524,29 @@ void PlaylistModel::setBusy(bool busy)
     emit busyChanged();
 }
 
+JSProcessManager *PlaylistModel::getProcessManager()
+{
+    return _jsProcessManager;
+}
+
+void PlaylistModel::setProcessManager(JSProcessManager *processManager)
+{
+    if (_jsProcessManager != nullptr) {
+         delete _jsProcessManager;
+    }
+    _jsProcessManager = processManager;
+
+    connect(_jsProcessManager, &JSProcessManager::searchFinished, this, &PlaylistModel::searchDone);
+    connect(_jsProcessManager, &JSProcessManager::gotTrendingVideos, this, &PlaylistModel::gotTrendingVideos);
+    connect(_jsProcessManager, &JSProcessManager::gotRecommendedVideos, this, &PlaylistModel::gotRecommendedVideos);
+    connect(_jsProcessManager, &JSProcessManager::gotChannelVideos, this, &PlaylistModel::gotChannelVideos);
+    connect(_jsProcessManager, &JSProcessManager::gotVideoInfo, this, &PlaylistModel::gotVideoInfo);
+    connect(_jsProcessManager, &JSProcessManager::gotPlaylist, this, &PlaylistModel::gotPlaylist);
+}
+
 void PlaylistModel::searchDone(bool continuation)
 {
-    SearchResults videos = _jsProcessManager.getSearchVideos();
+    SearchResults videos = _jsProcessManager->getSearchVideos();
     if (continuation) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount() + videos.size()-1);
         std::move(videos.begin(), videos.end(), std::back_inserter(_items));
@@ -551,7 +563,7 @@ void PlaylistModel::searchDone(bool continuation)
 void PlaylistModel::gotTrendingVideos()
 {
     beginResetModel();
-    _items = _jsProcessManager.getTrendingVideos();
+    _items = _jsProcessManager->getTrendingVideos();
     endResetModel();
 
     setBusy(false);
@@ -560,7 +572,7 @@ void PlaylistModel::gotTrendingVideos()
 void PlaylistModel::gotRecommendedVideos()
 {
     beginResetModel();
-    _items = _jsProcessManager.getRecommendedVideos();
+    _items = _jsProcessManager->getRecommendedVideos();
     endResetModel();
 
     setBusy(false);
@@ -568,7 +580,7 @@ void PlaylistModel::gotRecommendedVideos()
 
 void PlaylistModel::gotChannelVideos(bool continuation)
 {
-    SearchResults videos = _jsProcessManager.getChannelVideos();
+    SearchResults videos = _jsProcessManager->getChannelVideos();
     if (continuation) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount() + videos.size()-1);
         std::move(videos.begin(), videos.end(), std::back_inserter(_items));
@@ -584,7 +596,7 @@ void PlaylistModel::gotChannelVideos(bool continuation)
 
 void PlaylistModel::gotVideoInfo(QHash<int, QString> formats)
 {
-    std::unique_ptr<Video> video = _jsProcessManager.getVideoInfo();
+    std::unique_ptr<Video> video = _jsProcessManager->getVideoInfo();
 
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     _items.emplace_back(move(video));
@@ -595,7 +607,7 @@ void PlaylistModel::gotVideoInfo(QHash<int, QString> formats)
 
 void PlaylistModel::gotPlaylist()
 {
-    SearchResults videos = _jsProcessManager.getPlaylistVideos();
+    SearchResults videos = _jsProcessManager->getPlaylistVideos();
 
     beginInsertRows(QModelIndex(), rowCount(), rowCount() + videos.size()-1);
     std::move(videos.begin(), videos.end(), std::back_inserter(_items));
@@ -628,15 +640,15 @@ QHash<int, QByteArray> PlaylistModel::roleNames() const
 bool PlaylistModel::canFetchMore(const QModelIndex &parent) const
 {
     qDebug() << "Can fetch more: " << ((_lastSearch.has_value() && (
-                                            (_lastSearch->type == Search::Query && _jsProcessManager.hasSearchContinuation()) ||
-                                            (_lastSearch->type == Search::Channel && _jsProcessManager.hasVideosContinuation()) ||
-                                            (_lastSearch->type == Search::Playlist && _jsProcessManager.hasPlaylistContinuation())
+                                            (_lastSearch->type == Search::Query && _jsProcessManager->hasSearchContinuation()) ||
+                                            (_lastSearch->type == Search::Channel && _jsProcessManager->hasVideosContinuation()) ||
+                                            (_lastSearch->type == Search::Playlist && _jsProcessManager->hasPlaylistContinuation())
                                             )) ? "yes" : "no");
 
     return _lastSearch.has_value() && (
-               (_lastSearch->type == Search::Query && _jsProcessManager.hasSearchContinuation()) ||
-               (_lastSearch->type == Search::Channel && _jsProcessManager.hasVideosContinuation()) ||
-               (_lastSearch->type == Search::Playlist && _jsProcessManager.hasPlaylistContinuation())
+               (_lastSearch->type == Search::Query && _jsProcessManager->hasSearchContinuation()) ||
+               (_lastSearch->type == Search::Channel && _jsProcessManager->hasVideosContinuation()) ||
+               (_lastSearch->type == Search::Playlist && _jsProcessManager->hasPlaylistContinuation())
                );
 }
 
@@ -648,16 +660,16 @@ void PlaylistModel::fetchMore(const QModelIndex &parent)
 
     switch (_lastSearch->type) {
     case Search::Query:
-        _jsProcessManager.asyncContinueSearch(&_lastSearch.value());
+        _jsProcessManager->asyncContinueSearch(&_lastSearch.value());
         break;
     case Search::Channel:
     case Search::ChannelShorts:
     case Search::ChannelLiveStreams:
     case Search::ChannelPlaylists:
-        _jsProcessManager.asyncContinueChannelVideos(&_lastSearch.value());
+        _jsProcessManager->asyncContinueChannelVideos(&_lastSearch.value());
         break;
     case Search::Playlist:
-        _jsProcessManager.asyncContinuePlaylist(&_lastSearch.value());
+        _jsProcessManager->asyncContinuePlaylist(&_lastSearch.value());
         break;
     default:
         break;

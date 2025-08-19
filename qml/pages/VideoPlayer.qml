@@ -59,8 +59,14 @@ Page {
         anchors.centerIn: parent
     }
 
+    JsProcessManager {
+        id: jsProcessManager
+    }
+
     YtPlaylist {
         id: currentPlaylistModel
+
+        processManager: jsProcessManager
     }
 
     property var currentPlaylist: app.playlistMode ? app.playlistModel : currentPlaylistModel
@@ -130,6 +136,8 @@ Page {
     VideoHelper {
         id: videoHelper
 
+        processManager: jsProcessManager
+
         onSubtitleChanged: {
             var playing = videoPlayer.state === VideoPlayer.StatePlaying
             if (playing) videoPlayer.pause()
@@ -149,7 +157,6 @@ Page {
             if (videoChanging) videoChanging = false
             videoPlayer.play()
             sponsorBlockPlugin.videoId = videoHelper.currentVideo.videoId
-            currentPlaylistModel.loadRecommendedVideos(videoHelper.currentVideo.videoId)
             videoHelper.markAsWatched()
 
             if (googleOAuthHelper.linked) {

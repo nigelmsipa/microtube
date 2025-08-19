@@ -14,7 +14,7 @@ const youtube = await Innertube.create({
     enable_session_cache: false,
 });
 
-const info = await youtube.getInfo(query, 'TV');
+const info = await youtube.getInfo(query, { client: 'TV' });
 
 const formats = [
   ...(info?.streaming_data?.formats || []),

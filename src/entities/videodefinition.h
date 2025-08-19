@@ -40,26 +40,17 @@ const QMap<quint32, QVector<int>> VideoDefinition::videoDefinitionsCombined = {
 };
 
 const QMap<quint32, QVector<int>> VideoDefinition::liveVideoDefinitions = {
-/*    { 2160, { 315 } },
+    { 2160, { 315 } },
     { 1440, { 308 } },
     { 1080, { 303, 299, 248, 137, 96 } },
     { 720,  { 302, 298, 247, 136, 95 } },
     { 480,  {           244, 135, 94 } },
     { 360,  {           243, 134, 93 } },
     { 240,  {           242, 133, 92 } }
-    Sadly only combined streams work fine and I don't want to debug why
-    but it looks so nice I'm gonna leave it for future reference
-    */
-
-    { 1080, { 301, 96 } },
-    { 720,  { 300, 95 } },
-    { 480,  {      94 } },
-    { 360,  {      93 } },
-    { 240,  {      92 } }
 };
 
 const QVector<int> VideoDefinition::audioDefinitions = {
-    251, 250, 249
+    251, 250, 249, 140, 139
 };
 
 #endif // VIDEODEFINITION_H

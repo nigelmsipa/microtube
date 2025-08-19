@@ -21,6 +21,7 @@ class PlaylistModel : public QAbstractListModel
     Q_PROPERTY(int sortBy READ getSortBy WRITE setSortBy NOTIFY lastSearchChanged)
     Q_PROPERTY(bool busy READ isBusy NOTIFY busyChanged)
     Q_PROPERTY(bool canReverse READ getCanReverse NOTIFY lastSearchChanged)
+    Q_PROPERTY(JSProcessManager* processManager READ getProcessManager WRITE setProcessManager NOTIFY processManagerChanged)
     Q_ENUMS(DataTypes)
 public:
     explicit PlaylistModel(QObject *parent = nullptr);
@@ -55,7 +56,6 @@ public:
 
     Q_INVOKABLE void search(QString query);
     Q_INVOKABLE void searchAgain();
-    Q_INVOKABLE void loadRecommendedVideos(QString query);
     Q_INVOKABLE void loadCategory(QString category);
     Q_INVOKABLE void loadChannelVideos(QString channelId, int type = Search::Channel);
     Q_INVOKABLE void loadSubscriberVideos(QString channelId);
@@ -90,6 +90,8 @@ public:
     void setDurationFilter(int value);
     bool isBusy() const;
     void setBusy(bool busy);
+    JSProcessManager* getProcessManager();
+    void setProcessManager(JSProcessManager *processManager);
 
 signals:
     void currentVideoStreamUrlChanged();
@@ -100,6 +102,7 @@ signals:
     void currentVideoIndexChanged();
     void lastSearchChanged();
     void busyChanged();
+    void processManagerChanged();
 
 public slots:
     void searchDone(bool continuation);
@@ -119,7 +122,7 @@ protected:
 private:
     std::optional<Search> _lastSearch;
     SearchResults _items;
-    JSProcessManager _jsProcessManager;
+    JSProcessManager *_jsProcessManager;
     quint32 _maxDefinition;
     VideoRepository _videoRepository;
     qint32 _currentVideoIndex;

@@ -50,9 +50,10 @@ SearchResults VideosParser::parseRecommended(const QJsonArray videos)
 {
     SearchResults result;
 
-    for (const QJsonValue &item : videos) {
-        if (item.isUndefined() || item.toObject()["type"].toString().toLower() != "compactvideo") continue;
+    for (const QJsonValue &item : videos) {;
+        if (item.isUndefined() || item.toObject()["type"].toString().toLower() != "lockupview") continue;
         QJsonObject jsonVideo = item.toObject();
+
         result.push_back(VideoFactory::fromRecommendedJson(jsonVideo));
     }
 

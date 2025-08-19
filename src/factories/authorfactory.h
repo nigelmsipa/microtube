@@ -9,6 +9,7 @@ class AuthorFactory
 {
 public:
     static Author fromJson(QJsonObject json);
+    static Author fromRecommendedJson(QJsonObject json);
     static Author fromTrendingJson(QJsonObject json);
     static Author fromSqlRecord(QSqlRecord record);
     static Author fromChannelVideosJson(QJsonObject json);

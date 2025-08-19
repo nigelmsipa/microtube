@@ -23,6 +23,29 @@ Author AuthorFactory::fromJson(QJsonObject json)
     return author;
 }
 
+Author AuthorFactory::fromRecommendedJson(QJsonObject json)
+{
+    Author author{};
+
+    QJsonObject image = json["image"].toObject();
+    QString name = json["metadata"].toObject()["metadata_rows"].toArray().first().toObject()["metadata_parts"].toArray().first().toObject()["text"].toObject()["text"].toString();
+
+    for (const QJsonValue &avatar : image["avatar"].toObject()["image"].toArray()) {
+        author.avatars.append(ThumbnailFactory::fromJson(avatar.toObject()));
+    }
+    if (!author.avatars.empty()) {
+        author.bestAvatar = author.avatars.last();
+    }
+
+    QJsonObject navigation = image["renderer_context"].toObject()["command_context"].toObject()["on_tap"].toObject()["payload"].toObject();
+
+    author.authorId = navigation["browseId"].toString();
+    author.name = name;
+    author.url = "https://www.youtube.com" + navigation["canonicalBaseUrl"].toString();
+
+    return author;
+}
+
 Author AuthorFactory::fromTrendingJson(QJsonObject json)
 {
     Author author{};

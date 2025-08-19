@@ -3,9 +3,9 @@
 #include <QDebug>
 #include <QSettings>
 
-VideoHelper::VideoHelper(QObject *parent) : QObject(parent)
+VideoHelper::VideoHelper(QObject *parent) : QObject(parent), _jsProcessManager(new JSProcessManager)
 {
-    connect(&_jsProcessHelper, &JSProcessManager::gotVideoInfo, this, &VideoHelper::gotFormats);
+    connect(_jsProcessManager, &JSProcessManager::gotVideoInfo, this, &VideoHelper::gotFormats);
     connect(&_converter, &XmlToSrtConverter::gotSrt, this, &VideoHelper::gotSubtitles);
 }
 
@@ -21,7 +21,7 @@ void VideoHelper::loadVideoUrl(QString videoId, int maxDefinition, bool combined
     search.safeSearch = QSettings().value("safeSearch", false).toBool();
     search.type = Search::VideoInfo;
     search.query = videoId;
-    _jsProcessHelper.asyncGetVideoInfo(search);
+    _jsProcessManager->asyncGetVideoInfo(search);
 }
 
 void VideoHelper::loadSubtitle(int index)
@@ -101,9 +101,25 @@ void VideoHelper::setUseAVC(bool useAVC)
     QSettings().setValue("avc", useAVC);
 }
 
+JSProcessManager *VideoHelper::getProcessManager()
+{
+    return _jsProcessManager;
+}
+
+void VideoHelper::setProcessManager(JSProcessManager *processManager)
+{
+    if (_jsProcessManager != nullptr) {
+        delete _jsProcessManager;
+    }
+
+    _jsProcessManager = processManager;
+
+    connect(_jsProcessManager, &JSProcessManager::gotVideoInfo, this, &VideoHelper::gotFormats);
+}
+
 void VideoHelper::gotFormats(QHash<int, QString> formats)
 {
-    _currentVideo = _jsProcessHelper.getVideoInfo();
+    _currentVideo = _jsProcessManager->getVideoInfo();
 
     qDebug() << "Available formats: " << formats.keys();
 
