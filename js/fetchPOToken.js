@@ -41,8 +41,6 @@ const poTokenResult = await BG.PoToken.generate({
   bgConfig
 });
 
-const placeholderPoToken = BG.PoToken.generatePlaceholder(visitorData);
-
 console.log(JSON.stringify({
   poToken: poTokenResult.poToken,
   visitorData: visitorData,

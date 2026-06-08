@@ -335,6 +335,21 @@ Page {
             }
 
             MenuItem {
+                text: qsTr("Download audio")
+                enabled: videoHelper.currentVideo && videoHelper.currentVideo.url !== ""
+                onClicked: {
+                    var endsWithSlash = /\/$/;
+                    var path = settings.downloadLocation;
+                    if (!endsWithSlash.test(path)) path += '/';
+                    var filename = videoHelper.currentVideo.title.replace(/\W/g, '')
+                    if (filename === "") filename = "download"
+                    path += filename;
+                    path += '.m4a';
+                    videoDownloader.downloadAudio(videoHelper.currentVideo.url, path)
+                }
+            }
+
+            MenuItem {
                 text: qsTr("Copy url")
                 onClicked: Clipboard.text = videoHelper.currentVideo.url
             }

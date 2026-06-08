@@ -25,10 +25,14 @@ public:
     explicit VideoDownloader(QObject *parent = nullptr);
 
     Q_INVOKABLE void download(QString url, QString path);
+    Q_INVOKABLE void downloadAudio(QString url, QString path);
     DownloadStatus getDownloadStatus() const;
     void setDownloadStatus(DownloadStatus status);
     double getDownloadProgress() const;
     void setDownloadProgress(double progress);
+
+private:
+    void startDownload(QString url, QString path);
 
 private slots:
     void doDownload(QHash<int, QString> formats);
@@ -45,6 +49,7 @@ private:
     QNetworkReply *_reply;
     DownloadStatus _status;
     double _progress;
+    bool _audioOnly;
 };
 
 #endif // VIDEODOWNLOADER_H
