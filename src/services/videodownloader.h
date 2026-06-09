@@ -33,6 +33,9 @@ public:
 
 private:
     void startDownload(QString url, QString path);
+    void requestNextChunk();
+    void cleanupReply();
+    void cleanupFile(bool removePartial);
 
 private slots:
     void doDownload(QHash<int, QString> formats);
@@ -50,6 +53,11 @@ private:
     DownloadStatus _status;
     double _progress;
     bool _audioOnly;
+    QString _url;
+    qint64 _downloadedBytes;
+    qint64 _totalBytes;
+    qint64 _currentRangeStart;
+    qint64 _currentRangeEnd;
 };
 
 #endif // VIDEODOWNLOADER_H

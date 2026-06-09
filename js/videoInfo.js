@@ -9,11 +9,31 @@ Platform.shim.eval = async (data, env) => {
   return new Function(code)();
 };
 
-const query = process.argv[2];
+const rawQuery = process.argv[2];
 const parameters = JSON.parse(process.argv[3]);
 
+// youtubei.js v17 with the ANDROID_VR client throws 'This video is unavailable'
+// when given a full youtube.com URL — it only accepts bare 11-char video IDs.
+// (The IOS client accepted both forms, which is why this used to work.) The
+// download path in videodownloader.cpp passes a URL; playback passes an ID.
+// Normalize here so both callers work.
+function extractVideoId(q) {
+  if (/^[\w-]{11}$/.test(q)) return q;
+  try {
+    const u = new URL(q);
+    const v = u.searchParams.get('v');
+    if (v) return v;
+    // youtu.be/<id> or /shorts/<id> or /embed/<id>
+    const m = u.pathname.match(/\/(?:shorts|embed)\/([\w-]{11})/) ||
+              u.pathname.match(/^\/([\w-]{11})$/);
+    if (m) return m[1];
+  } catch (_) {}
+  return q;
+}
+const query = extractVideoId(rawQuery);
+
 // PO token + synchronized visitor_data (from fetchPOToken.js) un-redacts the
-// stream payload; retrieve_player + the iOS client return decipherable URLs.
+// stream payload; retrieve_player lets youtubei.js stamp/decipher stream URLs.
 const youtube = await Innertube.create({
   lang: parameters.language,
   location: parameters.country,
@@ -24,7 +44,7 @@ const youtube = await Innertube.create({
   retrieve_player: true,
 });
 
-const info = await youtube.getInfo(query, { client: 'IOS' });
+const info = await youtube.getInfo(query, { client: 'ANDROID_VR' });
 
 const formats = [
   ...(info?.streaming_data?.formats || []),
@@ -32,11 +52,33 @@ const formats = [
 ];
 
 // Decipher every format (await — async in v16+) so the C++ side gets real URLs.
+if (!youtube.session.player) {
+  process.stderr.write('videoInfo: WARNING player is null — n-transform will not fire, downloads will throttle\n');
+}
+function getUrlParam(url, key) {
+  if (!url) return null;
+  try {
+    return new URL(url).searchParams.get(key);
+  } catch (_) {
+    return null;
+  }
+}
 const urls = [];
 for (const format of formats) {
+  const origUrl = format.url;
+  const origN = getUrlParam(origUrl, 'n');
   try {
-    if (!format.url) format.url = await format.decipher(youtube.session.player);
-  } catch (e) { /* keep whatever url it has */ }
+    format.url = await format.decipher(youtube.session.player);
+    const newN = getUrlParam(format.url, 'n');
+    if (origN && newN === origN) {
+      process.stderr.write('videoInfo: decipher left n unchanged for itag ' + format.itag + ' — n-transform may have failed\n');
+    }
+    if (format.url && !getUrlParam(format.url, 'pot')) {
+      process.stderr.write('videoInfo: deciphered URL has no pot for itag ' + format.itag + '\n');
+    }
+  } catch (e) {
+    process.stderr.write('videoInfo: decipher error itag ' + format.itag + ': ' + e.message + '\n');
+  }
   urls.push(format);
 }
 

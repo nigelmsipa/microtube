@@ -7,6 +7,26 @@
 #include <QTextDocument>
 #include <QDateTime>
 
+// The stream URLs are minted by the ANDROID_VR InnerTube client (js/videoInfo.js,
+// c=ANDROID_VR in the URL). uridecodebin's default souphttpsrc sends
+// "GStreamer souphttpsrc/..." as its UA, which Google's video servers reject
+// with 403 (same URL returns 200 in curl). source-setup stamps the http source
+// with the ANDROID_VR UA so the request fingerprint matches the URL's client.
+// Mobile-app clients do NOT send Origin/Referer — those would be a WEB-client
+// fingerprint and trigger bandwidth throttling, so we deliberately omit them.
+static const char *kStreamUserAgent =
+    "com.google.android.apps.youtube.vr.oculus/1.65.10 "
+    "(Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip";
+
+static void cbSourceSetup(GstElement *bin, GstElement *source, gpointer data) {
+    Q_UNUSED(bin);
+    Q_UNUSED(data);
+    GObjectClass *klass = G_OBJECT_GET_CLASS(source);
+    if (g_object_class_find_property(klass, "user-agent")) {
+        g_object_set(source, "user-agent", kStreamUserAgent, NULL);
+    }
+}
+
 VideoPlayer::VideoPlayer(QQuickItem *parent) :
     QQuickPaintedItem(parent),
     _renderer(nullptr),
@@ -102,6 +122,7 @@ void VideoPlayer::setVideoSource(const QString& videoSource) {
             g_object_set(_videoSource, "uri", _videoUrl.toUtf8().constData(), NULL);
 
             gst_bin_add(GST_BIN(_pipeline), _videoSource);
+            g_signal_connect (_videoSource, "source-setup", G_CALLBACK (cbSourceSetup), this);
             g_signal_connect (_videoSource, "pad-added", G_CALLBACK (cbNewVideoPad), this);
         }
 
@@ -133,6 +154,7 @@ void VideoPlayer::setAudioSource(const QString& audioSource) {
 
         gst_bin_add(GST_BIN(_pipeline), _audioSource);
 
+        g_signal_connect(_audioSource, "source-setup", G_CALLBACK (cbSourceSetup), this);
         g_signal_connect(_audioSource, "pad-added", G_CALLBACK (cbNewPad), this);
 
         g_object_set(_audioSource, "uri", _audioUrl.toUtf8().constData(), NULL);
