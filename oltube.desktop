@@ -1,13 +1,13 @@
 [Desktop Entry]
 Type=Application
 X-Nemo-Application-Type=silica-qt5
-Icon=microtube
-Exec=microtube %U
-Name=µTube
+Icon=oltube
+Exec=oltube %U
+Name=Oltube
 MimeType=x-url-handler/youtube.com;x-url-handler/www.youtube.com;x-url-handler/youtu.be
-X-Maemo-Service=com.verdanditeam.microtube
+X-Maemo-Service=com.verdanditeam.oltube
 X-Maemo-Object-Path=/
-X-Maemo-Method=com.verdanditeam.microtube.openUrl
+X-Maemo-Method=com.verdanditeam.oltube.openUrl
 
 [X-Sailjail]
 Sandboxing=Disabled

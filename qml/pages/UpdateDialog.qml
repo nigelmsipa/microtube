@@ -58,7 +58,7 @@ Page {
             width: parent.width
 
             CenteredLabel {
-                text: qsTr("Microtube was updated to version %1!").arg(app.version)
+                text: qsTr("Oltube was updated to version %1!").arg(app.version)
                 font.family: Theme.fontFamilyHeading
                 font.pixelSize: Theme.fontSizeLarge
             }

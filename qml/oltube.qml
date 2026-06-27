@@ -65,7 +65,7 @@ ApplicationWindow
     Notification {
          id: downloadNotification
 
-         summary: qsTr("Microtube download")
+         summary: qsTr("Oltube download")
          replacesId: 1
     }
 

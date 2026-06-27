@@ -49,10 +49,10 @@ Page {
     DBusAdaptor {
         id: shareDBusInterface
 
-        service: "com.verdanditeam.microtube"
+        service: "com.verdanditeam.oltube"
         path: "/"
-        iface: "com.verdanditeam.microtube"
-        xml: '<interface name="com.verdanditeam.microtube">
+        iface: "com.verdanditeam.oltube"
+        xml: '<interface name="com.verdanditeam.oltube">
                   <method name="openUrl"> <arg type="s" name="url" direction="in"/> </method>
               </interface>'
 

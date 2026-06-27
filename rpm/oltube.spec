@@ -1,6 +1,6 @@
-Name:       microtube
+Name:       oltube
 
-Summary:    µTube
+Summary:    Oltube
 Version:    3.8.16
 Release:    1
 Group:      Qt/Qt
@@ -34,7 +34,7 @@ BuildRequires:  nemo-qml-plugin-notifications-qt5-devel
 BuildRequires:  cmake
 
 %description
-µtube is alternative youtube client!
+Oltube is an alternative youtube client (fork of microtube with audio download).
 
 %prep
 %setup -q -n %{name}-%{version}
@@ -57,4 +57,4 @@ desktop-file-install --delete-original       \
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
-%{_datadir}/dbus-1/services/com.verdanditeam.microtube.service
+%{_datadir}/dbus-1/services/com.verdanditeam.oltube.service

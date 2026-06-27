@@ -1,4 +1,4 @@
-project(microtube CXX)
+project(oltube CXX)
 cmake_minimum_required(VERSION 3.5)
 include(CMakeDependentOption)
 
@@ -82,7 +82,7 @@ qt5_create_translation(QM_FILES ${TsFiles})
 
 file( GLOB_RECURSE SOURCES src/*.cpp )
 file( GLOB_RECURSE HEADERS src/*.h )
-add_executable(microtube
+add_executable(oltube
     ${SOURCES}
     ${HEADERS}
     $<TARGET_OBJECTS:SortFilterProxyModel>
@@ -91,11 +91,11 @@ add_executable(microtube
     qml/resources/resources.qrc
     ${QM_FILES}
     )
-target_compile_definitions(microtube PRIVATE
+target_compile_definitions(oltube PRIVATE
     $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
 )
 
-target_include_directories(microtube PRIVATE
+target_include_directories(oltube PRIVATE
     $<BUILD_INTERFACE:
     src
     ${GLIB_INCLUDE_DIRS}
@@ -108,7 +108,7 @@ target_include_directories(microtube PRIVATE
     ${EGL_INCLUDE_DIRS}
     ${o2_SOURCE}
     >)
-target_link_libraries(microtube
+target_link_libraries(oltube
     Qt5::Quick
     Qt5::DBus
     Qt5::Sql
@@ -127,7 +127,7 @@ target_link_libraries(microtube
     ${NEMO_GSTREAMER_INTERFACES_LDFLAGS}
 )
 
-target_compile_options(microtube PUBLIC
+target_compile_options(oltube PUBLIC
     ${EGL_CFLAGS_OTHER}
 )
 
@@ -137,35 +137,35 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_DEBUG} -O3 -DQT_NO_DEBUG_OUTPUT")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_DEBUG} -O3 -DQT_NO_DEBUG_OUTPUT")
 
-install(TARGETS microtube
+install(TARGETS oltube
     RUNTIME DESTINATION bin
 )
 install(DIRECTORY qml
-    DESTINATION share/microtube
+    DESTINATION share/oltube
 )
 install(DIRECTORY js
-    DESTINATION share/microtube
+    DESTINATION share/oltube
 )
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/translations
-    DESTINATION share/microtube
+    DESTINATION share/oltube
     FILES_MATCHING PATTERN "*.qm"
 )
-install(FILES microtube.desktop
+install(FILES oltube.desktop
     DESTINATION share/applications
 )
-install(FILES icons/86x86/microtube.png
+install(FILES icons/86x86/oltube.png
     DESTINATION share/icons/hicolor/86x86/apps
 )
-install(FILES icons/108x108/microtube.png
+install(FILES icons/108x108/oltube.png
     DESTINATION share/icons/hicolor/108x108/apps
 )
-install(FILES icons/128x128/microtube.png
+install(FILES icons/128x128/oltube.png
     DESTINATION share/icons/hicolor/128x128/apps
 )
-install(FILES icons/172x172/microtube.png
+install(FILES icons/172x172/oltube.png
     DESTINATION share/icons/hicolor/172x172/apps
 )
-install(FILES com.verdanditeam.microtube.service
+install(FILES com.verdanditeam.oltube.service
     DESTINATION /usr/share/dbus-1/services
 )
 
@@ -174,8 +174,8 @@ file(GLOB_RECURSE JS_FILES qml/*.js)
 
 add_custom_target(distfiles
     SOURCES
-        microtube.desktop
-        qml/microtube.qml
+        oltube.desktop
+        qml/oltube.qml
         js/channelInfo.js
         js/videoInfo.js
         js/basicVideoInfo.js
@@ -185,14 +185,14 @@ add_custom_target(distfiles
         js/package.json
         js/subscriptionsAggregator.js
         js/fetchPOToken.js
-        rpm/microtube.spec
-        com.verdanditeam.microtube.service
+        rpm/oltube.spec
+        com.verdanditeam.oltube.service
         ${JS_FILES}
         ${QML_FILES}
         ${TsFiles})
 
 file(WRITE "${CMAKE_BINARY_DIR}/QtCreatorDeployment.txt"
     "${CMAKE_INSTALL_PREFIX}
-${CMAKE_BINARY_DIR}/microtube:bin
+${CMAKE_BINARY_DIR}/oltube:bin
 ")
 

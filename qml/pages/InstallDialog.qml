@@ -58,7 +58,7 @@ Page {
             width: parent.width
 
             CenteredLabel {
-                text: qsTr("Thank you for installing Microtube!")
+                text: qsTr("Thank you for installing Oltube!")
                 font.family: Theme.fontFamilyHeading
                 font.pixelSize: Theme.fontSizeLarge
             }

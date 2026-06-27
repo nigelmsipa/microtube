@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<JSProcessManager>("com.verdanditeam.yt", 1, 0, "JsProcessManager");
     qmlRegisterUncreatableType<Search>("com.verdanditeam.yt", 1, 0, "Search", "");
 
-    view->setSource(SailfishApp::pathTo("qml/microtube.qml"));
+    view->setSource(SailfishApp::pathTo("qml/oltube.qml"));
     view->show();
 
     return app->exec();

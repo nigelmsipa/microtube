@@ -43,14 +43,14 @@ Page {
             width: parent.width
 
             Image {
-                source: "/usr/share/icons/hicolor/172x172/apps/microtube.png"
+                source: "/usr/share/icons/hicolor/172x172/apps/oltube.png"
                 width: 2/3 * parent.width
                 fillMode: Image.PreserveAspectFit
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
             Label {
-                text: "microtube " + app.version
+                text: "oltube " + app.version
                 font.pixelSize: Theme.fontSizeExtraLarge
                 anchors.horizontalCenter: parent.horizontalCenter
                 wrapMode: Text.WordWrap

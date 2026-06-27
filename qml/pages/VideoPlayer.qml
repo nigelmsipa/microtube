@@ -119,7 +119,7 @@ Page {
         id: videoHelperYupii
 
         onGotVideoInfo: {
-            jupii.addUrlOnceAndPlay(videoHelperYupii.videoUrl, videoHelperYupii.currentVideo.url, videoHelperYupii.currentVideo.title, videoHelperYupii.currentVideo.author.name, videoHelperYupii.currentVideo.description, 4, "microtube", "/usr/share/icons/hicolor/172x172/apps/microtube.png")
+            jupii.addUrlOnceAndPlay(videoHelperYupii.videoUrl, videoHelperYupii.currentVideo.url, videoHelperYupii.currentVideo.title, videoHelperYupii.currentVideo.author.name, videoHelperYupii.currentVideo.description, 4, "oltube", "/usr/share/icons/hicolor/172x172/apps/oltube.png")
         }
     }
 
@@ -1475,7 +1475,7 @@ Page {
     MprisPlayer {
         id: mprisPlayer
 
-        serviceName: "microtube"
+        serviceName: "oltube"
         property string artist: videoHelper.currentVideo ? videoHelper.currentVideo.author.name : ""
         property string song: videoHelper.currentVideo ? videoHelper.currentVideo.title : ""
         property var playbackState: Mpris.Playing
@@ -1496,7 +1496,7 @@ Page {
             mprisPlayer.metadata = metadata
         }
 
-        identity: "microtube"
+        identity: "oltube"
 
         canControl: true
 

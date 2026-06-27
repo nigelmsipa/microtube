@@ -27,7 +27,7 @@ void UserFilesHelper::copyJsFiles()
         {
             QFile::remove(appDataLocation + "js/" + file);
         }
-        QFile::copy("/usr/share/microtube/js/" + file, appDataLocation + "js/" + file);
+        QFile::copy("/usr/share/oltube/js/" + file, appDataLocation + "js/" + file);
     }
 
     QProcess* process = new QProcess();
